@@ -100,6 +100,15 @@ export default {
       })
     },
     handleSendCode () {
+      this.$refs['ruleForm'].validateField('mobile', errorMessage => {
+        console.log(errorMessage)
+        if (errorMessage.trim().length > 0) {
+          return
+        }
+        this.showGeetest()
+      })
+    },
+    showGeetest () {
       const { mobile } = this.form
 
       if (this.captchaObj) {
