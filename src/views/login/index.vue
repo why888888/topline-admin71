@@ -14,7 +14,14 @@
               <el-input v-model= 'form.code' placeholder = '验证码'></el-input>
             </el-col>
             <el-col :span='10' :offset='1'>
-              <el-button @click='handleSendCode'>获取验证码</el-button>
+              <!-- :disabled 如果定时器为true禁用 -->
+              <el-button
+              @click='handleSendCode'
+              :disabled='!!codeTimer'
+              >
+                <!-- 倒计时 -->
+                {{ codeTimer ? `剩余${codeSecons}秒` : '获取验证码' }}
+              </el-button>
             </el-col>
           </el-form-item>
           <el-form-item prop='agree'>
@@ -38,7 +45,8 @@
 
 <script>
 import axios from 'axios'
-import '@/vendor/gt'
+import '@/vendor/gt' // gt.js 会向全局 window 暴露一个函数 initGeetest
+const initCodeSeconds = 60
 export default {
   name: 'AppLogin',
   data () {
@@ -63,7 +71,9 @@ export default {
           { pattern: /true/, message: '请同意用户协议', trigger: 'change' }
         ]
       },
-      captchaObj: null
+      captchaObj: null, // 通过 initGeetest 得到的极验验证码对象
+      codeSecons: initCodeSeconds, // 倒计时的时间
+      codeTimer: null // 倒计时定时器
     }
   },
   methods: {
@@ -128,9 +138,9 @@ export default {
           product: 'bind'
         }, (captchaObj) => {
           this.captchaObj = captchaObj
-          captchaObj.onReady(function () {
+          captchaObj.onReady(() => {
             captchaObj.verify()
-          }).onSuccess(function () {
+          }).onSuccess(() => {
             const {
               geetest_challenge: challenge,
               geetest_seccode: seccode,
@@ -147,10 +157,23 @@ export default {
               }
             }).then(res => {
               console.log(res.data)
+              // 发送短信之后，开始倒计时
+              this.codeCountDown()
             })
           })
         })
       })
+    },
+    // 倒计时
+    codeCountDown () {
+      this.codeTimer = window.setInterval(() => {
+        this.codeSecons--
+        if (this.codeSecons <= 0) {
+          this.codeSecons = initCodeSeconds // 让倒计时时间回到初始状态
+          window.clearInterval(this.codeTimer) // 清除定时器
+          this.codeTimer = null // 清除倒计时定时器的标识
+        }
+      }, 1000)
     }
   }
 }
