@@ -11,10 +11,10 @@
           </el-form-item>
           <el-form-item>
             <el-col :span='13'>
-              <el-input v-model= 'form.mobile' placeholder = '验证码'></el-input>
+              <el-input v-model= 'form.code' placeholder = '验证码'></el-input>
             </el-col>
             <el-col :span='10' :offset='1'>
-              <el-button>获取验证码</el-button>
+              <el-button @click='handleSendCode'>获取验证码</el-button>
             </el-col>
           </el-form-item>
           <el-form-item>
@@ -27,12 +27,14 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'AppLogin',
   data () {
     return {
       form: {
-        mobile: '',
+        mobile: '15340047821',
         code: ''
       }
     }
@@ -40,6 +42,16 @@ export default {
   methods: {
     onSubmit () {
       console.log('submit!')
+    },
+    handleSendCode () {
+      const { mobile } = this.form
+
+      axios({
+        method: 'GET',
+        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`
+      }).then(res => {
+        console.log(res.data)
+      })
     }
   }
 }
