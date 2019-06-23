@@ -18,7 +18,12 @@
             </el-col>
           </el-form-item>
           <el-form-item>
-            <el-button class="btn-login" type='primary' @click='handleLogin'>登录</el-button>
+            <el-button
+              class="btn-login"
+              type='primary'
+              @click='handleLogin'
+              :loading='loginLoading'
+            >登录</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -37,6 +42,7 @@ export default {
         mobile: '15340047821',
         code: ''
       },
+      loginLoading: false,
       rules: {
         mobile: [
           { required: true, message: '请输入后记号', trigger: 'blur' },
@@ -60,6 +66,7 @@ export default {
       })
     },
     submitLogin () {
+      this.loginLoading = true
       axios({
         method: 'POST',
         url: 'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
@@ -70,6 +77,8 @@ export default {
           type: 'success'
         })
 
+        this.loginLoading = false
+
         this.$router.push({
           name: 'home'
         })
@@ -77,6 +86,7 @@ export default {
         if (err.response.status === 400) {
           this.$message.error('登录失败，手机号或验证码错误')
         }
+        this.loginLoading = false
       })
     },
     handleSendCode () {
