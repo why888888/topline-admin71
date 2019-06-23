@@ -36,7 +36,8 @@ export default {
       form: {
         mobile: '15340047821',
         code: ''
-      }
+      },
+      captchaObj: null
     }
   },
   methods: {
@@ -46,11 +47,29 @@ export default {
     handleSendCode () {
       const { mobile } = this.form
 
+      if (this.captchaObj) {
+        return this.captchaObj.verify()
+      }
+
       axios({
         method: 'GET',
         url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`
       }).then(res => {
-        console.log(res.data)
+        const data = res.data.data
+        window.initGeetest({
+          gt: data.gt,
+          challenge: data.challenge,
+          offline: !data.success,
+          new_captcha: data.new_captcha,
+          product: 'bind'
+        }, (captchaObj) => {
+          this.captchaObj = captchaObj
+          captchaObj.onReady(function () {
+            captchaObj.verify()
+          }).onSuccess(function () {
+            console.log('验证成功了')
+          })
+        })
       })
     }
   }
