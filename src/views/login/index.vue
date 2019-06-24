@@ -73,11 +73,13 @@ export default {
       },
       captchaObj: null, // 通过 initGeetest 得到的极验验证码对象
       codeSecons: initCodeSeconds, // 倒计时的时间
-      codeTimer: null // 倒计时定时器
+      codeTimer: null, // 倒计时定时器
+      sendMobile: '' // 保存初始化验证码之后发送短信的手机号
     }
   },
   methods: {
     handleLogin () {
+      // 对整个表单进行校验的方法，参数为一个回调函数。
       this.$refs['ruleForm'].validate(valid => {
         if (!valid) {
           return
@@ -110,24 +112,42 @@ export default {
       })
     },
     handleSendCode () {
+      // 对部分表单字段进行校验的方法
       this.$refs['ruleForm'].validateField('mobile', errorMessage => {
-        console.log(errorMessage)
         if (errorMessage.trim().length > 0) {
           return
         }
-        this.showGeetest()
+
+        // 手机号码验证通过
+
+        // 验证是否有验证码插件对象
+        if (this.captchaObj) {
+          // 手机号码有效，初始化验证码插件
+          // this.showGeetest
+          // 如果用户输入的手机号和之前初始化的验证码手机号不一致，就急于当前手机号码重新初始化
+          // 否则，直接verify显示
+          if (this.form.mobile !== this.sendMobile) {
+            // 手机号码发送改变，重新初始化验证码插件
+
+            // 重新初始化之前，将原来的验证码插件DOM删除
+            document.body.removeChild(document.querySelector('.geetest_panel'))
+
+            // 重新初始化
+            this.showGeetest()
+          } else {
+            // 一致，直接verify
+            this.captchaObj.verify()
+          }
+        } else {
+          // 这里是第一次的初始化验证插件
+          this.showGeetest()
+        }
       })
     },
     showGeetest () {
-      const { mobile } = this.form
-
-      if (this.captchaObj) {
-        return this.captchaObj.verify()
-      }
-
       axios({
         method: 'GET',
-        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`
+        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${this.form.mobile}`
       }).then(res => {
         const data = res.data.data
         window.initGeetest({
@@ -139,6 +159,8 @@ export default {
         }, (captchaObj) => {
           this.captchaObj = captchaObj
           captchaObj.onReady(() => {
+            // 只有ready了才能显示验证码
+            this.sendMobile = this.form.mobile
             captchaObj.verify()
           }).onSuccess(() => {
             const {
@@ -149,7 +171,7 @@ export default {
 
             axios({
               method: 'GET',
-              url: `http://ttapi.research.itcast.cn/mp/v1_0/sms/codes/${mobile}`,
+              url: `http://ttapi.research.itcast.cn/mp/v1_0/sms/codes/${this.form.mobile}`,
               params: {
                 challenge,
                 seccode,
@@ -182,6 +204,8 @@ export default {
 <style lang="less" scoped>
 .login-wrap{
   height:100%;
+  background: url('./login_bg.jpg') no-repeat;
+  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
