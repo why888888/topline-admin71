@@ -166,7 +166,7 @@ export default {
             // 只有ready了才能显示验证码
             this.sendMobile = this.form.mobile
             captchaObj.verify()
-            //验证码初始化好了，让'获取验证码'按钮可点击
+            // 验证码初始化好了，让'获取验证码'按钮可点击
             this.codeLoading = false
           }).onSuccess(() => {
             const {
