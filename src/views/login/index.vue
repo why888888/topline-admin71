@@ -17,7 +17,7 @@
               <!-- :disabled 如果定时器为true禁用 -->
               <el-button
               @click='handleSendCode'
-              :disabled='!!codeTimer'
+              :disabled='!!codeTimer || codeLoading'
               >
                 <!-- 倒计时 -->
                 {{ codeTimer ? `剩余${codeSecons}秒` : '获取验证码' }}
@@ -74,7 +74,8 @@ export default {
       captchaObj: null, // 通过 initGeetest 得到的极验验证码对象
       codeSecons: initCodeSeconds, // 倒计时的时间
       codeTimer: null, // 倒计时定时器
-      sendMobile: '' // 保存初始化验证码之后发送短信的手机号
+      sendMobile: '', // 保存初始化验证码之后发送短信的手机号
+      codeLoading: false
     }
   },
   methods: {
@@ -145,6 +146,9 @@ export default {
       })
     },
     showGeetest () {
+      // 初始化验证码期间，禁用按钮的点击状态
+      this.codeLoading = true
+
       axios({
         method: 'GET',
         url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${this.form.mobile}`
@@ -162,6 +166,8 @@ export default {
             // 只有ready了才能显示验证码
             this.sendMobile = this.form.mobile
             captchaObj.verify()
+            //验证码初始化好了，让'获取验证码'按钮可点击
+            this.codeLoading = false
           }).onSuccess(() => {
             const {
               geetest_challenge: challenge,
