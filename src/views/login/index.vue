@@ -47,7 +47,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import '@/vendor/gt' // gt.js 会向全局 window 暴露一个函数 initGeetest
 const initCodeSeconds = 60 // 设置定时器时间
 export default {
@@ -95,9 +94,9 @@ export default {
     // 登录
     submitLogin () {
       this.loginLoading = true
-      axios({
+      this.$http({
         method: 'POST',
-        url: 'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
+        url: '/authorizations',
         data: this.form
       }).then(res => { // 登录成功
         // 登录成功，将接口返回的用户信息数据放到本地存储
@@ -159,10 +158,10 @@ export default {
       // 初始化验证码期间，禁用按钮的点击状态
       this.codeLoading = true
 
-      axios({
+      this.$http({
         method: 'GET',
         //
-        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${this.form.mobile}` // 获取人机验证码
+        url: `/captchas/${this.form.mobile}` // 获取人机验证码
       }).then(res => {
         const data = res.data.data
         window.initGeetest({
@@ -188,9 +187,9 @@ export default {
               geetest_validate: validate } =
             captchaObj.getValidate() // 获取用户进行成功验证所得到的结果
 
-            axios({
+            this.$http({
               method: 'GET',
-              url: `http://ttapi.research.itcast.cn/mp/v1_0/sms/codes/${this.form.mobile}`, // 获取短信验证码
+              url: `/sms/codes/${this.form.mobile}`, // 获取短信验证码
               params: {
                 challenge,
                 seccode,
