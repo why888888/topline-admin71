@@ -39,7 +39,8 @@ const router = new Router({
 })
 
 /**
- * 所有路由导航都要经过这里
+ * 所有路由导航都要经过这里 (导航守卫)
+ * 全局前置守卫
  * to 去哪儿
  * from 来自哪里
  * next 允许通过的方法
@@ -70,6 +71,7 @@ router.beforeEach((to, from, next) => {
 })
 
 // 路由导航完成的时候进入这里
+// 全局后置钩子
 router.afterEach((to, from) => {
   nprogress.done()
 })
