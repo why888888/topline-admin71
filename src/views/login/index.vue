@@ -5,6 +5,9 @@
         <img src="./logo_index.png" alt="黑马头条">
       </div>
       <div class="login-form">
+        <!--
+          a
+        -->
         <el-form ref='ruleForm' :model='form' :rules='rules'>
           <el-form-item prop='mobile'>
             <el-input v-model= 'form.mobile' placeholder = '手机号'></el-input>
@@ -46,7 +49,7 @@
 <script>
 import axios from 'axios'
 import '@/vendor/gt' // gt.js 会向全局 window 暴露一个函数 initGeetest
-const initCodeSeconds = 60
+const initCodeSeconds = 60 // 设置定时器时间
 export default {
   name: 'AppLogin',
   data () {
@@ -71,7 +74,7 @@ export default {
           { pattern: /true/, message: '请同意用户协议', trigger: 'change' }
         ]
       },
-      captchaObj: null, // 通过 initGeetest 得到的极验验证码对象
+      captchaObj: null, // 通过 initGeetest 得到的极验验证码对象 （极验验证码对象）
       codeSecons: initCodeSeconds, // 倒计时的时间
       codeTimer: null, // 倒计时定时器
       sendMobile: '', // 保存初始化验证码之后发送短信的手机号
@@ -79,6 +82,7 @@ export default {
     }
   },
   methods: {
+    // 点击登录后验证所有表单数据
     handleLogin () {
       // 对整个表单进行校验的方法，参数为一个回调函数。
       this.$refs['ruleForm'].validate(valid => {
@@ -88,30 +92,35 @@ export default {
         this.submitLogin()
       })
     },
+    // 登录
     submitLogin () {
       this.loginLoading = true
       axios({
         method: 'POST',
         url: 'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
         data: this.form
-      }).then(res => {
-        this.$message({
+      }).then(res => { // 登录成功
+        // 登录成功，将接口返回的用户信息数据放到本地存储
+        window.localStorage.setItem('user_info', JSON.stringify(res.data.data))
+
+        this.$message({ // elementui提供的弹窗
           message: '登录成功',
           type: 'success'
         })
 
         this.loginLoading = false
 
-        this.$router.push({
+        this.$router.push({ // 使用router的push方法进行路由跳转
           name: 'home'
         })
-      }).catch(err => {
+      }).catch(err => { // 登录失败
         if (err.response.status === 400) {
           this.$message.error('登录失败，手机号或验证码错误')
         }
         this.loginLoading = false
       })
     },
+    // 点击获取验证码 单独验证手机号
     handleSendCode () {
       // 对部分表单字段进行校验的方法
       this.$refs['ruleForm'].validateField('mobile', errorMessage => {
@@ -145,39 +154,43 @@ export default {
         }
       })
     },
+    // 极验 验证码
     showGeetest () {
       // 初始化验证码期间，禁用按钮的点击状态
       this.codeLoading = true
 
       axios({
         method: 'GET',
-        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${this.form.mobile}`
+        //
+        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${this.form.mobile}` // 获取人机验证码
       }).then(res => {
         const data = res.data.data
         window.initGeetest({
-          gt: data.gt,
-          challenge: data.challenge,
-          offline: !data.success,
-          new_captcha: data.new_captcha,
-          product: 'bind'
+          // 一下配置参数来自服务器端 SDK
+          gt: data.gt, // 验证 id，极验后台申请得到
+          challenge: data.challenge, // 验证流水号，后服务端 SDK 向极验服务器申请得到
+          offline: !data.success, // 极验API服务器是否宕机（即处于 fallback 状态）
+          new_captcha: data.new_captcha, // 宕机情况下使用，表示验证是 3.0 还是 2.0，3.0 的 sdk 该字段为 true
+          product: 'bind' // 验证码窗口弹出方式: 隐藏按钮式
         }, (captchaObj) => {
           this.captchaObj = captchaObj
+          // 这里可以调用验证实例 captchaObj 的实例方法
           captchaObj.onReady(() => {
-            // 只有ready了才能显示验证码
             this.sendMobile = this.form.mobile
+            // 只有ready了才能显示验证码
             captchaObj.verify()
             // 验证码初始化好了，让'获取验证码'按钮可点击
             this.codeLoading = false
-          }).onSuccess(() => {
+          }).onSuccess(() => { // 监听验证成功事件
             const {
               geetest_challenge: challenge,
               geetest_seccode: seccode,
               geetest_validate: validate } =
-            captchaObj.getValidate()
+            captchaObj.getValidate() // 获取用户进行成功验证所得到的结果
 
             axios({
               method: 'GET',
-              url: `http://ttapi.research.itcast.cn/mp/v1_0/sms/codes/${this.form.mobile}`,
+              url: `http://ttapi.research.itcast.cn/mp/v1_0/sms/codes/${this.form.mobile}`, // 获取短信验证码
               params: {
                 challenge,
                 seccode,

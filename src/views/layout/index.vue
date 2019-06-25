@@ -9,7 +9,7 @@
       </el-header>
       <el-main>
         <!-- Layout 组件的路由出口 -->
-        <el-main>Main</el-main>
+        <router-view/>
       </el-main>
     </el-container>
   </el-container>
@@ -45,6 +45,6 @@ export default {
 }
 
 .el-main {
-  background-color: #e8eff4;
+  background-color: #ddd;
 }
 </style>
