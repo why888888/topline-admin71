@@ -98,9 +98,9 @@ export default {
         method: 'POST',
         url: '/authorizations',
         data: this.form
-      }).then(res => { // 登录成功
+      }).then(data => { // 登录成功
         // 登录成功，将接口返回的用户信息数据放到本地存储
-        window.localStorage.setItem('user_info', JSON.stringify(res.data.data))
+        window.localStorage.setItem('user_info', JSON.stringify(data))
 
         this.$message({ // elementui提供的弹窗
           message: '登录成功',
@@ -162,8 +162,7 @@ export default {
         method: 'GET',
         //
         url: `/captchas/${this.form.mobile}` // 获取人机验证码
-      }).then(res => {
-        const data = res.data.data
+      }).then(data => {
         window.initGeetest({
           // 一下配置参数来自服务器端 SDK
           gt: data.gt, // 验证 id，极验后台申请得到
@@ -195,8 +194,8 @@ export default {
                 seccode,
                 validate
               }
-            }).then(res => {
-              console.log(res.data)
+            }).then(data => {
+              console.log(data)
               // 发送短信之后，开始倒计时
               this.codeCountDown()
             })
