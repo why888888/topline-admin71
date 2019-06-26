@@ -35,9 +35,9 @@ axios.interceptors.request.use(config => {
  * Axios 响应拦截器
  * 统一处理响应的数据格式
  */
-axios.interceptors.response.use(response => {
+axios.interceptors.response.use(response => { // >=200&&<=400
   return response.data.data
-}, error => {
+}, error => { // >400
   const status = error.response.status
   if (status === 401) {
     // 务必删除本地存储中的用户信息数据
