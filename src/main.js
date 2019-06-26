@@ -6,12 +6,29 @@ import router from './router'
 import './styles/index.less' // 全局样式
 import 'nprogress/nprogress.css' // 导入进入条css
 import axios from 'axios' // 配置axios
+import JSONbig from 'json-bigint'
 
 // 配置 axios 的基础路由
 // 而就是说配置了这个东西，你就不用每次都写长长的 http://xxxx
 // 只需要,axios({ url: '/autorizations' })
 // 路径中的/,多退少补
 axios.defaults.baseURL = 'http://ttapi.research.itcast.cn/mp/v1_0/'
+
+// 使用 JSONbig 处理返回数据中超出 JavaScript 安全整数范围的数字
+// JSONbig 自己会分析数据中的哪个数字超出范围了
+// // 由于后端的数据 id 超出了 JavaScript 的安全整数范围，会导致整数无法精确表示
+// 可以使用 json-biginit 来处理，它会帮你把找出范围的数字给处理好
+axios.defaults.transformResponse = [function (data) {
+  // data 是未经处理的后端响应数据：JSON 格式字符串
+  // Do whatever you want to transform the data
+  try {
+    // data数据可能不是标准的JSON格式字符串，否则会导致JSON.parse(data)转换失败报错
+    return JSONbig.parse(data)
+  } catch (err) {
+    // 无法转换的数据将直接原样返回
+    return data
+  }
+}]
 
 /**
  * Axios 请求拦截器
@@ -20,7 +37,7 @@ axios.defaults.baseURL = 'http://ttapi.research.itcast.cn/mp/v1_0/'
  * return config 就是允许通过的方式
  */
 axios.interceptors.request.use(config => {
-  const userInfo = JSON.parse(window.localStorage.getItem('userInfo'))
+  const userInfo = JSON.parse(window.localStorage.getItem('user_info'))
   // 如果登陆了，才给那些需要 token 的接口统一添加 token 令牌
   // 登录相关接口不需要添加 token 令牌，想要也没有
   if (userInfo) {
@@ -36,7 +53,12 @@ axios.interceptors.request.use(config => {
  * 统一处理响应的数据格式
  */
 axios.interceptors.response.use(response => { // >=200&&<=400
-  return response.data.data
+  // 如果返回的数据格式是对象
+  if (typeof response.data === 'object') {
+    return response.data.data
+  } else {
+    return response.data
+  }
 }, error => { // >400
   const status = error.response.status
   if (status === 401) {

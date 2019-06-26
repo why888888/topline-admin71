@@ -6,7 +6,10 @@
       </div>
       <div class="login-form">
         <!--
-          a
+        表单验证：
+        rules 配置验证规则
+        将需要验证的字段通过 prop 属性配置到 el-form-item 组件上
+        ref   获取表单组件，可以手动调用表单组件的验证方法
         -->
         <el-form ref='ruleForm' :model='form' :rules='rules'>
           <el-form-item prop='mobile'>
