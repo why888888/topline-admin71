@@ -20,8 +20,12 @@ axios.defaults.baseURL = 'http://ttapi.research.itcast.cn/mp/v1_0/'
  * return config 就是允许通过的方式
  */
 axios.interceptors.request.use(config => {
-  const userInfo = JSON.parse(window.localStorage.getIntem('userInfo'))
-  config.headers.Authorization = `Bearer ${userInfo.token}`
+  const userInfo = JSON.parse(window.localStorage.getItem('userInfo'))
+  // 如果登陆了，才给那些需要 token 的接口统一添加 token 令牌
+  // 登录相关接口不需要添加 token 令牌，想要也没有
+  if (userInfo) {
+    config.headers.Authorization = `Bearer ${userInfo.token}`
+  }
   return config
 }, error => {
   return Promise.reject(error)
@@ -32,9 +36,18 @@ axios.interceptors.request.use(config => {
  * 统一处理响应的数据格式
  */
 axios.interceptors.response.use(response => {
-  console.log('response => ', response)
   return response.data.data
 }, error => {
+  const status = error.response.status
+  if (status === 401) {
+    // 务必删除本地存储中的用户信息数据
+    window.localStorage.removeItem('user_info')
+
+    // 跳转到登录页面
+    router.push({
+      name: 'login'
+    })
+  }
   return Promise.reject(error)
 })
 
