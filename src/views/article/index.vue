@@ -6,7 +6,7 @@
         <span>筛选条件</span>
         <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
       </div>
-      <el-form ref="form" :model="form" label-width="80px">
+      <el-form ref="form" :model="filterParams" label-width="80px">
         <el-form-item label="状态">
           <el-radio-group v-model="filterParams.status">
             <el-radio label=''>全部</el-radio>
@@ -19,6 +19,7 @@
         </el-form-item>
         <el-form-item label="频道">
           <el-select v-model="filterParams.channel_id" placeholder="请选择活动区域">
+            <el-option label='全部' value=''></el-option>
             <el-option
               v-for='item in channels'
               :key='item.id'
@@ -113,12 +114,16 @@
         一：分多少页
           每页多大，默认是10条每页，我们的接口如果没有指定每页条数，则默认也是按照每页10条返回数据
           有多少条数据
+          total 总记录数
+          current-page 当前页码，也就是高亮的那个页码
         二：页面改变加载对应的页码数据
        -->
       <el-pagination
         background
         layout="prev, pager, next"
         :total="totalCount"
+        :disabled='articleLoading'
+        :current-page='page'
         @current-change="handleCurrentChage"
       >
       </el-pagination>
@@ -136,7 +141,7 @@ export default {
       articles: [], // 列表数据
       totalCount: 0, // 总数据条数
       articleLoading: false, // 控制文档加载中 loading 效果
-      page:1, // 当前页面
+      page: 1, // 当前页面
       statTypes: [
         {
           type: 'info',
@@ -211,6 +216,7 @@ export default {
       })
     },
     onSubmit () {
+      this.page = 1 // 让分页组件回到1
       this.loadArticles()
     },
     handleCurrentChage (page) {
