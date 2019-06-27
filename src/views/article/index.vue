@@ -8,16 +8,17 @@
       </div>
       <el-form ref="form" :model="form" label-width="80px">
         <el-form-item label="状态">
-          <el-radio-group v-model="form.resource">
+          <el-radio-group v-model="filterParams.status">
+            <el-radio label=''>全部</el-radio>
             <el-radio
-              v-for='item in statTypes'
+              v-for='(item,index) in statTypes'
               :key='item.label'
-              :label='item.label'
-            ></el-radio>
+              :label='index + ""'
+            >{{ item.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="频道">
-          <el-select v-model="form.region" placeholder="请选择活动区域">
+          <el-select v-model="filterParams.channel_id" placeholder="请选择活动区域">
             <el-option
               v-for='item in channels'
               :key='item.id'
@@ -28,15 +29,21 @@
         </el-form-item>
         <el-form-item label="时间">
           <el-date-picker
-            v-model="form.value1"
             type="daterange"
+            value-format='yyyy-MM-dd'
+            v-model='begin_end_pubdate'
+            @change='handleDateChange'
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">查询</el-button>
+          <el-button
+            type="primary"
+            @click="onSubmit"
+            :loading='articleLoading'
+          >查询</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -45,7 +52,7 @@
     <!-- 列表 -->
     <el-card class="list-card">
       <div slot="header" class="clearfix">
-        <span>共找到15条符合条件的内容</span>
+        <span>共找到<strong>{{ totalCount }}</strong>条符合条件的内容</span>
       </div>
 
       <!-- table 表格 -->
@@ -127,20 +134,9 @@ export default {
   data () {
     return {
       articles: [], // 列表数据
-      form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: '',
-        value1: ''
-      },
-      totalCount: 0,
-      articleLoading: false,
-      page: 1,
+      totalCount: 0, // 总数据条数
+      articleLoading: false, // 控制文档加载中 loading 效果
+      page:1, // 当前页面
       statTypes: [
         {
           type: 'info',
@@ -163,7 +159,14 @@ export default {
           label: '已删除'
         }
       ],
-      channels: [] // 频道列表
+      channels: [], // 频道列表
+      filterParams: { // 文章查询条件参数
+        status: '', // 文章状态
+        channel_id: '', // 频道id
+        begin_pubdate: '', // 开始时间
+        end_pubdate: '' // 结束时间
+      },
+      begin_end_pubdate: [] // 存储日期选择器同步的[开始时间，结束时间]，这个字段没啥用，只是日期选择器必须 v-mode 绑定一个数据才会触发 change 事件
     }
   },
   created () {
@@ -184,12 +187,22 @@ export default {
     },
     loadArticles (page = 1) {
       this.articleLoading = true
+
+      // 过滤出有效的查询条件数据字段
+      const filterData = {}
+      for (let key in this.filterParams) {
+        if (this.filterParams[key]) {
+          filterData[key] = this.filterParams[key]
+        }
+      }
+
       this.$http({
         methods: 'GET',
         url: '/articles',
         params: {
           page,
-          per_page: 10 // 请求数据每页大小，默认10
+          per_page: 10, // 请求数据每页大小，默认10
+          ...filterData // 将对象混入当前对象，说白了就是对象拷贝
         }
       }).then(data => {
         this.articles = data.results // 列表数据
@@ -198,7 +211,7 @@ export default {
       })
     },
     onSubmit () {
-      console.log('submit!')
+      this.loadArticles()
     },
     handleCurrentChage (page) {
       this.page = page
@@ -231,6 +244,13 @@ export default {
           message: '已取消删除!'
         })
       })
+    },
+    /**
+     * 日期选择组件改变事件
+     */
+    handleDateChange (value) {
+      this.filterParams.begin_pubdate = value[0]
+      this.filterParams.end_pubdate = value[1]
     }
   }
 }
