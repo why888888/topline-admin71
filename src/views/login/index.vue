@@ -58,7 +58,7 @@ export default {
     return {
       form: {
         mobile: '15340047821',
-        code: '',
+        code: '246810',
         agree: '' // 是否同意用户协议
       },
       loginLoading: false,
@@ -102,6 +102,7 @@ export default {
         url: '/authorizations',
         data: this.form
       }).then(data => { // 登录成功
+        console.log(data)
         // 登录成功，将接口返回的用户信息数据放到本地存储
         window.localStorage.setItem('user_info', JSON.stringify(data))
 

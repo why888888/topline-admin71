@@ -21,7 +21,7 @@ export default {
   name: 'AppHeader',
   data () {
     return {
-      ruserInfo: {}
+      userInfo: {}
     }
   },
   created () {

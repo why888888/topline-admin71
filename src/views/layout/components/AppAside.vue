@@ -60,6 +60,14 @@ export default {
   name: 'AppAside',
   data () {
     return {}
+  },
+  methods: {
+    handleOpen (key, keyPath) {
+      console.log(key, keyPath)
+    },
+    handleClose (key, keyPath) {
+      console.log(key, keyPath)
+    }
   }
 }
 </script>
