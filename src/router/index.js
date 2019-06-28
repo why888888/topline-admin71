@@ -25,12 +25,12 @@ const router = new Router({
         },
         { // 发布文章
           name: 'publish',
-          path: '/publish', // 它就是 layout 的默认路由
+          path: '/publish',
           component: () => import('@/views/publish')
         },
         { // 编辑文章
           name: 'publish-edit',
-          path: '/publish/:id', // 它就是layout的默认子路由
+          path: '/publish/:id',
           component: () => import('@/views/publish')
         },
         {
@@ -42,6 +42,12 @@ const router = new Router({
           name: 'article-comment',
           path: '/comment',
           component: () => import('@/views/comment')
+        },
+        {
+          // 账户设置
+          name: 'account-setting',
+          path: '/account',
+          component: () => import('@/views/account')
         }
       ]
     }
