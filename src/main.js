@@ -7,6 +7,7 @@ import './styles/index.less' // 全局样式
 import 'nprogress/nprogress.css' // 导入进入条css
 import axios from 'axios' // 配置axios
 import JSONbig from 'json-bigint'
+import store from './store'
 
 // 配置 axios 的基础路由
 // 而就是说配置了这个东西，你就不用每次都写长长的 http://xxxx
@@ -92,6 +93,7 @@ Vue.use(ElementUI)
 Vue.config.productionTip = false
 
 new Vue({
+  store,
   router,
   render: h => h(App)
 }).$mount('#app')
