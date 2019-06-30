@@ -44,7 +44,7 @@
       <i class="iconfont icon-image"></i>
       <span slot="title">素材</span>
     </el-menu-item>
-    <el-menu-item index="/fans">
+    <el-menu-item index="/fans/overview">
       <i class="iconfont icon-fensi"></i>
       <span slot="title">粉丝</span>
     </el-menu-item>
