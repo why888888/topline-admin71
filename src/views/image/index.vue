@@ -5,8 +5,8 @@
     </div>
     <div class="action">
       <el-radio-group v-model="active">
-        <el-radio-button label="全部"></el-radio-button>
-        <el-radio-button label="收藏"></el-radio-button>
+        <el-radio-button label="全部" @click.native='loadImages(false)'></el-radio-button>
+        <el-radio-button label="收藏" @click.native='loadImages(true)'></el-radio-button>
       </el-radio-group>
       <el-button type="primary">上传图片</el-button>
     </div>
@@ -22,7 +22,12 @@
               plain
               @click='handleCollect(item)'
               ></el-button>
-            <el-button type="primary" icon="el-icon-delete" circle plain></el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-delete"
+              circle plain
+              @click='handleDelete(item)'
+            ></el-button>
           </div>
         </el-card>
       </el-col>
@@ -43,10 +48,13 @@ export default {
     this.loadImages()
   },
   methods: {
-    async loadImages () {
+    async loadImages (collect) {
       this.$http({
         method: 'GET',
-        url: '/user/images'
+        url: '/user/images',
+        params: {
+          collect // true收藏图片，false全部图片
+        }
       }).then(data => {
         this.images = data.results
       })
@@ -68,6 +76,28 @@ export default {
       }).catch(err => {
         console.log(err)
         this.$message.error(`${collect ? '' : '取消'}收藏失败`)
+      })
+    },
+    handleDelete (item) {
+      this.$confirm('确认删除吗？', '删除提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$http({
+          method: 'DELETE',
+          url: `/user/images/${item.id}`
+        }).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+          // 删除之后，刷新数据列表
+          this.loadImages()
+        }).catch(err => {
+          console.log(err)
+          this.$message.error('删除失败')
+        })
       })
     }
   }
