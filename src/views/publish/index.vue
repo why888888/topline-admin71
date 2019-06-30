@@ -105,7 +105,25 @@ export default {
   //     // immediate: true或false // 默认只有当被监视成员发生改变的时候才会调用监视函数，如果希望初始的时候就调用一次，则可以配置该值为 true
   //   }
   // },
+
+  watch: {
+    $route (to, from) {
+      // 如果你是从更新页面来的
+      if (from.name === 'publish-edit') {
+        this.articleForm = {
+          title: '', // 标题
+          content: '', // 内容
+          cover: { // 封面
+            type: 0, // 封面类型 -1:自动，0-无图，1-1张，3-3张
+            images: [] // 图片链接
+          },
+          channel_id: '' // 频道
+        }
+      }
+    }
+  },
   created () {
+    console.log('created')
     this.isEdit && this.loadArticle()
     // 如果是发布页面，则直接开启监视
     if (this.$route.name === 'publish') {
