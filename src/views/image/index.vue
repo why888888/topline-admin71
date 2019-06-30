@@ -8,7 +8,22 @@
         <el-radio-button label="全部" @click.native='loadImages(false)'></el-radio-button>
         <el-radio-button label="收藏" @click.native='loadImages(true)'></el-radio-button>
       </el-radio-group>
-      <el-button type="primary">上传图片</el-button>
+      <!--
+        on-success 是一个props参数
+        props绑定的数据是一个表达式，它会将表达式的计算结果绑定到这里
+        {{ 函数 }}
+        {{ 函数() }}
+        v-bind 中的语法和{{  }} 中的一致
+     -->
+      <el-upload
+        action="http://ttapi.research.itcast.cn/mp/v1_0/user/images"
+        :headers="{ Authorization: `Bearer ${$store.state.user.token}` }"
+        name="image"
+        :on-success="handleUplaodSuccess"
+        :show-file-list="false"
+      >
+        <el-button size="small" type="primary">点击上传</el-button>
+      </el-upload>
     </div>
     <el-row :gutter="20">
       <el-col :span="4" v-for='item in images' :key='item.id'>
@@ -99,6 +114,12 @@ export default {
           this.$message.error('删除失败')
         })
       })
+    },
+    /**
+     * 当上传组件上传文件成功的时候会调用
+     */
+    handleUplaodSuccess () {
+      this.loadImages(false)
     }
   }
 }
