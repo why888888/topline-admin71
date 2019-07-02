@@ -27,12 +27,20 @@
         ></quill-editor>
       </el-form-item>
       <el-form-item label="封面">
-        <el-radio-group v-model='article.cover.type'>
+        <el-radio-group v-model='articleForm.cover.type'>
           <el-radio :label='1'>单图</el-radio>
           <el-radio :label='3'>三图</el-radio>
           <el-radio :label='0'>无图</el-radio>
           <el-radio :label='-1'>自动</el-radio>
         </el-radio-group>
+        <!-- 根据类型遍历显示上传文件组件 -->
+        <template v-if='articleForm.cover.type > 0'>
+          <el-row>
+            <el-col :span='6' v-for='n in articleForm.cover.type' :key='n'>
+              <UploadImage></UploadImage>
+            </el-col>
+          </el-row>
+        </template>
       </el-form-item>
       <el-form-item label="频道">
         <!--
@@ -65,7 +73,7 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 import { quillEditor } from 'vue-quill-editor'
-
+import UploadImage from './components/upload-image'
 /**
  * 如果是更新，则在第一次个更新数据之后开启监视
  * 如果是添加，则一上来就监视
@@ -76,7 +84,8 @@ export default {
   name: 'AppPublish',
   components: {
     ArticleChannel,
-    quillEditor
+    quillEditor,
+    UploadImage
   },
   data () {
     return {
@@ -84,7 +93,7 @@ export default {
         title: '', // 标题
         content: '', // 内容
         cover: { // 封面
-          type: 0, // 封面类型 -1:自动，0-无图，1-1张，3-3张
+          type: 1, // 封面类型 -1:自动，0-无图，1-1张，3-3张
           images: [] // 图片链接
         },
         channel_id: '' // 频道
@@ -120,7 +129,7 @@ export default {
           title: '', // 标题
           content: '', // 内容
           cover: { // 封面
-            type: 0, // 封面类型 -1:自动，0-无图，1-1张，3-3张
+            type: 1, // 封面类型 -1:自动，0-无图，1-1张，3-3张
             images: [] // 图片链接
           },
           channel_id: '' // 频道
