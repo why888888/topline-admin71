@@ -37,7 +37,7 @@
         <template v-if='articleForm.cover.type > 0'>
           <el-row>
             <el-col :span='6' v-for='n in articleForm.cover.type' :key='n'>
-              <UploadImage></UploadImage>
+              <UploadImage v-model='articleForm.cover.images[n - 1]'></UploadImage>
             </el-col>
           </el-row>
         </template>
